@@ -1,56 +1,143 @@
-# MERN APP
+# 🐳 Guide Docker Compose - Application Full Stack
 
-## Vue d'Ensemble
-Ce projet est une application full-stack qui consiste en un client React et un serveur Node.js utilisant MongoDB comme base de données. Docker est utilisé pour la conteneurisation, et Docker Compose est utilisé pour orchestrer les services.
+Ce projet utilise Docker Compose pour orchestrer une application complète avec Frontend React, Backend Express et MongoDB.
 
-## Table des Matières
-- [Technologies Utilisées](#technologies-utilisées)
-- [Variables d'Environnement](#variables-denvironnement)
-- [Configuration de Docker](#configuration-de-docker)
-- [Images Docker](#images-docker)
-- [Docker Compose](#docker-compose)
-- [Comment Exécuter le Projet](#comment-executer-le-projet)
+## 📋 Table des matières
 
-## Technologies Utilisées
-- **Frontend** : React
-- **Backend** : Node.js, Express
-- **Base de Données** : MongoDB
-- **Conteneurisation** : Docker, Docker Compose
+- [Architecture](#architecture)
+- [Construction et exécution](#construction-et-exécution)
+- [Accès aux services](#accès-aux-services)
+- [Commandes utiles](#commandes-utiles)
+- [Dépannage](#dépannage)
 
-## Variables d'Environnement
-Les variables d'environnement suivantes sont utilisées dans l'application :
+## 🏛️ Architecture
 
-- **REACT_APP_API_URL** : Cette variable contient l'URL de base pour le serveur API. Elle est utilisée dans le client React pour faire des requêtes au serveur.
-- **MONGO_URI** : L'URI de connexion à MongoDB utilisée par le serveur pour se connecter à l'instance MongoDB.
+Le projet est composé de trois services principaux :
 
-## Configuration de Docker
-Ce projet comprend des Dockerfiles pour le client et le serveur, qui facilitent la construction et l'exécution des services dans des conteneurs isolés. Les configurations incluent :
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Frontend      │────▶│    Backend      │────▶│    MongoDB      │
+│   (React)       │     │   (Express)     │     │   (Database)    │
+│   Port: 3000    │     │   Port: 9000    │     │   Port: 27017   │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+```
 
-- **Client** : Un environnement Node.js pour construire l'application React. Les dépendances sont installées et l'application est construite pour une utilisation en production. Un serveur HTTP simple peut être utilisé pour servir l'application construite.
-  
-- **Serveur** : Un environnement Node.js qui installe les dépendances nécessaires et configure l'application pour écouter sur un port spécifique.
 
-## Images Docker
-Les images Docker créées pour ce projet sont les suivantes :
+## ⚙️ Construction et exécution des conteneurs
 
-- **Image du Client** : `node:lts-alpine`
-- **Image du Serveur** : `node:lts-alpine`
-- **Image de la Base de Données** : `mongo:latest`
+### Démarrage complet avec build
 
-Ces images sont spécifiées dans les Dockerfiles respectifs et sont utilisées lors de la construction et du déploiement des services.
+```bash
+docker compose up --build
+```
 
-## Docker Compose
-Docker Compose est utilisé pour gérer les différents services de l'application, y compris le client, le serveur et MongoDB. Les services sont interconnectés, ce qui permet une communication fluide entre le client et le serveur. Le fichier de configuration spécifie les images, les ports exposés, ainsi que les variables d'environnement nécessaires pour chaque service.
+Cette commande :
+- 🏗️ Construit les images Docker à partir des Dockerfile
+- 🚀 Crée et lance les conteneurs
+- 🔄 Orchestre l'ordre de démarrage grâce à `depends_on` (le serveur démarre après MongoDB, le client après le serveur)
+- 📊 Affiche les logs en temps réel
 
-## Comment Exécuter le Projet
-1. Assurez-vous d'avoir Docker et Docker Compose installés sur votre machine.
-2. Clonez ce dépôt sur votre machine locale.
-3. Accédez au répertoire du projet dans votre terminal.
-4. Construisez et démarrez l'application en utilisant Docker Compose :
+### Démarrage en arrière-plan
 
-   ```bash
-   docker-compose up --build
-   ```
+```bash
+docker compose up -d
+```
 
-5. Accédez au client à [http://localhost:3000](http://localhost:3000).
+L'option `-d` (detached) exécute les conteneurs en arrière-plan.
 
+## 🌐 Accès aux services
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Frontend (React)** | [http://localhost:3000](http://localhost:3000) | Interface utilisateur |
+| **Backend (Express)** | [http://localhost:9000](http://localhost:9000) | API du serveur |
+| **MongoDB** | `mongo:27017` (interne) | Base de données NoSQL |
+
+> **Note** : MongoDB n'est accessible que depuis le réseau Docker interne pour des raisons de sécurité.
+
+## 📦 Commandes utiles
+
+### Gestion des services
+
+#### ▶️ Démarrer tous les services
+```bash
+docker compose up -d
+```
+
+#### 🛑 Arrêter les services
+```bash
+docker compose stop
+```
+
+#### 🗑️ Arrêter et supprimer les conteneurs
+```bash
+docker compose down
+```
+
+### Construction et reconstruction
+
+#### 🔁 Reconstruction complète des images
+```bash
+docker compose up --build
+```
+
+#### 🔨 Construire sans démarrer
+```bash
+docker compose build
+```
+
+### Monitoring et logs
+
+#### 📋 Voir les logs de tous les services
+```bash
+docker compose logs
+```
+
+### Inspection et debug
+
+#### 📊 Lister les conteneurs en cours d'exécution
+```bash
+docker compose ps
+```
+### Gestion des volumes
+
+#### 📁 Lister les volumes
+```bash
+docker volume ls
+```
+## 🔍 Dépannage
+
+### Les conteneurs ne démarrent pas
+
+1. **Vérifier les logs** :
+```bash
+docker compose logs
+```
+
+### Mise à jour des dépendances
+
+Après avoir modifié `package.json` :
+```bash
+docker compose down
+docker compose build --no-cache
+docker compose up
+```
+
+## 🔒 Bonnes pratiques
+
+- ✅ Utilisez toujours `docker compose down` avant de quitter pour libérer les ressources
+- ✅ Committez le `docker-compose.yml` mais pas les fichiers `.env` sensibles
+- ✅ Utilisez des volumes pour persister les données MongoDB
+- ✅ Documentez les variables d'environnement dans `.env.example`
+- ✅ Testez régulièrement avec `--build` pour détecter les problèmes de build
+
+## 📚 Ressources
+
+- [Documentation Docker](https://docs.docker.com/)
+- [Documentation Docker Compose](https://docs.docker.com/compose/)
+- [Best practices pour Dockerfile](https://docs.docker.com/develop/dev-best-practices/)
+
+
+## 📄 Licence
+
+Ce projet est sous licence [MIT](LICENSE).
