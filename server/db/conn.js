@@ -1,7 +1,6 @@
 const { MongoClient } = require("mongodb");
 
-// Use the hostname of the MongoDB service in your Docker network.
-// Replace 'mongo' with the service name of your MongoDB container if it's different.
+// URL de connexion MongoDB depuis l'environnement
 const Db = process.env.MONGO_URI;
 const client = new MongoClient(Db);
 
@@ -10,13 +9,13 @@ let _db;
 module.exports = {
   connectToMongoDB: async function () {
     try {
-      // Connect to the MongoDB server
+      // Connexion au serveur MongoDB
       await client.connect();
-      _db = client.db("employees");  // Connect to the "employees" database
+      _db = client.db("employees"); // Nom de la base de données
       console.log("Successfully connected to MongoDB.");
     } catch (error) {
       console.error("Error connecting to MongoDB:", error);
-      throw error;  // Throw the error to be handled by the caller
+      throw error; // Propagation de l'erreur
     }
   },
 
